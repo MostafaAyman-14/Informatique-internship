@@ -8,7 +8,7 @@ import java.time.LocalDate;
 public class BorrowingRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     @ManyToOne
     private Book book;
     @ManyToOne
