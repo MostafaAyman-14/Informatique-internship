@@ -2,6 +2,7 @@ package com.library.app.service;
 import com.library.app.exceptions.ResourceNotFoundException;
 import com.library.app.entity.Book;
 import com.library.app.repository.BookRepos;
+import com.library.app.security.SecurityConfig;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -15,6 +16,10 @@ import java.util.List;
 public class BookService {
     @Autowired
     private BookRepos bookRepository;
+    @Autowired
+    private AuditService auditService;
+    @Autowired
+    private SecurityConfig user;
     @Cacheable("books")
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
@@ -27,7 +32,10 @@ public class BookService {
 @Transactional
     @CachePut(value = "books", key = "#book.id")
     public Book addBook(Book book) {
-        return bookRepository.save(book);
+        Book savedBook=bookRepository.save(book);
+       String username=user.getCurrentUsername();
+        auditService.log("Book", savedBook.getId(), "ADD", username);
+        return savedBook;
     }
 
     @Transactional
@@ -38,13 +46,18 @@ public class BookService {
         book.setAuthor(bookDetails.getAuthor());
         book.setPublicationYear(bookDetails.getPublicationYear());
         book.setIsbn(bookDetails.getIsbn());
-        return bookRepository.save(book);
+        Book updatedBook=bookRepository.save(book);
+        String username=user.getCurrentUsername();
+        auditService.log("Book", updatedBook.getId(), "UPDATE", username);
+        return updatedBook;
     }
 
     @Transactional
     @CacheEvict(value = "books", key = "#id")
     public void deleteBook(Long id) {
         bookRepository.deleteById(id);
+        String username=user.getCurrentUsername();
+        auditService.log("Book", id, "DELETE", username);
     }
 }
 

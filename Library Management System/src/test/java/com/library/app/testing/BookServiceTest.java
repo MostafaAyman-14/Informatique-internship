@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.library.app.entity.Book;
 import com.library.app.exceptions.ResourceNotFoundException;
 import com.library.app.repository.BookRepos;
+import com.library.app.security.SecurityConfig;
 import com.library.app.service.BookService;
+import com.library.app.service.AuditService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +25,12 @@ public class BookServiceTest {
 
     @Mock
     private BookRepos bookRepository;
+
+    @Mock
+    private AuditService auditService;
+
+    @Mock
+    private SecurityConfig securityConfig;
 
     @InjectMocks
     private BookService bookService;
@@ -70,22 +78,26 @@ public class BookServiceTest {
     @Test
     void testAddBook() {
         when(bookRepository.save(any(Book.class))).thenReturn(book);
+        when(securityConfig.getCurrentUsername()).thenReturn("testuser");
 
         Book savedBook = bookService.addBook(book);
 
         assertNotNull(savedBook);
         assertEquals(book, savedBook);
+        verify(auditService, times(1)).log(eq("Book"), eq(book.getId()), eq("ADD"), eq("testuser"));
     }
 
     @Test
     void testUpdateBook() {
         when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
         when(bookRepository.save(any(Book.class))).thenReturn(book);
+        when(securityConfig.getCurrentUsername()).thenReturn("testuser");
 
         Book updatedBook = bookService.updateBook(1L, book);
 
         assertNotNull(updatedBook);
         assertEquals(book, updatedBook);
+        verify(auditService, times(1)).log(eq("Book"), eq(book.getId()), eq("UPDATE"), eq("testuser"));
     }
 
     @Test
@@ -98,9 +110,11 @@ public class BookServiceTest {
     @Test
     void testDeleteBook() {
         doNothing().when(bookRepository).deleteById(1L);
+        when(securityConfig.getCurrentUsername()).thenReturn("testuser");
 
         bookService.deleteBook(1L);
 
         verify(bookRepository, times(1)).deleteById(1L);
+        verify(auditService, times(1)).log(eq("Book"), eq(1L), eq("DELETE"), eq("testuser"));
     }
 }
