@@ -3,11 +3,11 @@ package com.library.app.controller;
 import com.library.app.entity.Book;
 import com.library.app.repository.BookRepos;
 import com.library.app.service.BookService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-// BookController.java
 @RestController
 @RequestMapping("/api/books")
 public class BookController {
@@ -25,12 +25,12 @@ public class BookController {
     }
 
     @PostMapping
-    public Book addBook(@RequestBody Book book) {
+    public Book addBook(@Valid @RequestBody Book book) {
         return bookService.addBook(book);
     }
 
     @PutMapping("/{id}")
-    public Book updateBook(@PathVariable Long id, @RequestBody Book bookDetails) {
+    public Book updateBook(@PathVariable Long id, @Valid @RequestBody Book bookDetails) {
         return bookService.updateBook(id, bookDetails);
     }
 

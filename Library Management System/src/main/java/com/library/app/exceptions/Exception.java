@@ -32,10 +32,9 @@ public class Exception {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    // Other exception handlers
+
 
     @Data
-    @AllArgsConstructor
     public static class ErrorResponse {
         private int status;
         private String message;
@@ -45,7 +44,7 @@ public class Exception {
             this.message = message;
         }
 
-        // Getters and setters
+
         public int getStatus() {
             return status;
         }

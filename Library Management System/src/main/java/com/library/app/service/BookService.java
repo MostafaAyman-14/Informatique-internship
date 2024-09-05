@@ -2,30 +2,36 @@ package com.library.app.service;
 import com.library.app.exceptions.ResourceNotFoundException;
 import com.library.app.entity.Book;
 import com.library.app.repository.BookRepos;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-// BookService.java
 @Service
 public class BookService {
     @Autowired
     private BookRepos bookRepository;
-
+    @Cacheable("books")
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
     }
-
+    @Cacheable(value = "books", key = "#id")
     public Book getBookById(Long id) {
 
         return bookRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Book not found"));
     }
-
+@Transactional
+    @CachePut(value = "books", key = "#book.id")
     public Book addBook(Book book) {
         return bookRepository.save(book);
     }
 
+    @Transactional
+    @CachePut(value = "books", key = "#id")
     public Book updateBook(Long id, Book bookDetails) {
         Book book = getBookById(id);
         book.setTitle(bookDetails.getTitle());
@@ -35,6 +41,8 @@ public class BookService {
         return bookRepository.save(book);
     }
 
+    @Transactional
+    @CacheEvict(value = "books", key = "#id")
     public void deleteBook(Long id) {
         bookRepository.deleteById(id);
     }

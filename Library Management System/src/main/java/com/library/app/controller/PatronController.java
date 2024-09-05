@@ -2,6 +2,7 @@ package com.library.app.controller;
 
 import com.library.app.entity.Patron;
 import com.library.app.service.PatronService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -25,12 +26,12 @@ public class PatronController {
     }
 
     @PostMapping
-    public Patron addPatron(@RequestBody Patron patron) {
+    public Patron addPatron(@Valid @RequestBody Patron patron) {
         return patronService.addPatron(patron);
     }
 
     @PutMapping("/{id}")
-    public Patron updatePatron(@PathVariable Long id, @RequestBody Patron patronDetails) {
+    public Patron updatePatron(@PathVariable Long id,@Valid @RequestBody Patron patronDetails) {
         return patronService.updatePatron(id, patronDetails);
     }
 
